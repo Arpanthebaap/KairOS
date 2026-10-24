@@ -32,7 +32,7 @@ jobs:
 
       - name: Verify Repository Size Budget (< 10 MB)
         run: |
-          REPO_SIZE_KB=$(du -sk --exclude='.git' . | cut -f1)
+          REPO_SIZE_KB=$(du -sk --exclude='.git' --exclude='node_modules' . | cut -f1)
           echo "Repository working tree size: ${REPO_SIZE_KB} KB"
           if [ "$REPO_SIZE_KB" -gt 10240 ]; then
             echo "ERROR: Repository size exceeds 10 MB threshold!"
