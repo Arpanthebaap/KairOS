@@ -4,7 +4,7 @@
 *Independent Researcher (Applied AI Systems & Computational Operations Research), Birbhum, West Bengal, India*  
 **Contact:** `arpanghosh984@gmail.com` | +91 77971 30249 | [GitHub Profile](https://github.com/Arpanthebaap)  
 Version 1.0.0 • MIT licence  
-[![DOI](https://zenodo.org/badge/1431923945.svg)](https://zenodo.org/badge/latestdoi/1431923945)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23612725.svg)](https://doi.org/10.5281/zenodo.23612725)
 [![CI Tests](https://github.com/Arpanthebaap/KairOS/actions/workflows/ci.yml/badge.svg)](https://github.com/Arpanthebaap/KairOS/actions/workflows/ci.yml)
 [![Live Pages](https://github.com/Arpanthebaap/KairOS/actions/workflows/pages.yml/badge.svg)](https://arpanthebaap.github.io/KairOS/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -404,8 +404,8 @@ If you utilize KairOS in your academic research, computational operations resear
   year         = 2026,
   publisher    = {Zenodo},
   version      = {1.0.0},
-  doi          = {10.5281/zenodo.1431923945},
-  url          = {https://zenodo.org/badge/latestdoi/1431923945}
+  doi          = {10.5281/zenodo.23612725},
+  url          = {https://doi.org/10.5281/zenodo.23612725}
 }
 ```
 
