@@ -1,0 +1,41 @@
+name: KairOS CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  verify:
+    name: Typecheck, Unit Tests & Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Vitest Invariant Suite
+        run: npm run test
+
+      - name: Compile & Build Production Bundle
+        run: npm run build
+
+      - name: Verify Repository Size Budget (< 10 MB)
+        run: |
+          REPO_SIZE_KB=$(du -sk --exclude='.git' . | cut -f1)
+          echo "Repository working tree size: ${REPO_SIZE_KB} KB"
+          if [ "$REPO_SIZE_KB" -gt 10240 ]; then
+            echo "ERROR: Repository size exceeds 10 MB threshold!"
+            exit 1
+          fi
+          echo "Repository size satisfies strict < 10 MB constraint."
