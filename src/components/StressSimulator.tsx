@@ -37,8 +37,8 @@ export const StressSimulator: React.FC<StressSimulatorProps> = ({
   };
 
   const getRobustnessColor = (score: number) => {
-    if (score >= 0.90) return 'text-emerald-400 border-emerald-500/40 bg-emerald-950/40';
-    if (score >= 0.75) return 'text-amber-400 border-amber-500/40 bg-amber-950/40';
+    if (score >= 0.90) {return 'text-emerald-400 border-emerald-500/40 bg-emerald-950/40';}
+    if (score >= 0.75) {return 'text-amber-400 border-amber-500/40 bg-amber-950/40';}
     return 'text-rose-400 border-rose-500/40 bg-rose-950/40';
   };
 

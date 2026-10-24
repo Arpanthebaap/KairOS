@@ -29,7 +29,7 @@ export const McpInspector: React.FC<McpInspectorProps> = ({ isOpen, onClose }) =
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const handleToolSelect = (toolName: string) => {
     setSelectedTool(toolName);

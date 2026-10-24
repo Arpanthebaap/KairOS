@@ -91,9 +91,10 @@ describe('WCAG 2.1 AAA & WAI-ARIA Accessibility Invariants', () => {
     expect(stressCode).toContain('id="slider-rain-prob"');
   });
 
-  it('verifies CSS contains reduced motion media query and screen-reader utility classes', () => {
+  it('verifies CSS contains reduced motion media query, screen-reader utility classes, and high-contrast support', () => {
     const css = readCss();
     expect(css).toContain('prefers-reduced-motion: reduce');
+    expect(css).toContain('forced-colors: active');
     expect(css).toContain('.sr-only');
     expect(css).toContain('.focus\\:not-sr-only');
     expect(css).toContain(':focus-visible');

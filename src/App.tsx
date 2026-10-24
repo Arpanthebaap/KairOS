@@ -1,8 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { EventConfig, CompleteEventPlan } from './core/types';
-import { generateCompleteEventPlan } from './agents/gemini_client';
-import { solveBudgetKnapsack } from './core/knapsack_budget';
-import { auditEventSafetyInvariants } from './core/safety_governor';
+/**
+ * KairOS Application Root Component
+ * 
+ * Neuro-Symbolic Generative Planning Studio orchestrating spatiotemporal DAG scheduling,
+ * convex knapsack resource optimization, and cultural narrative synthesis.
+ * 
+ * Compliant with WCAG 2.1 AAA accessibility invariants and WAI-ARIA 1.2 authoring practices.
+ * 
+ * @module App
+ */
+
+import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { EventWizard } from './components/EventWizard';
 import { TimelineGantt } from './components/TimelineGantt';
@@ -11,6 +18,8 @@ import { VendorManager } from './components/VendorManager';
 import { StressSimulator } from './components/StressSimulator';
 import { McpInspector } from './components/McpInspector';
 import { ExportModal } from './components/ExportModal';
+import { useKairOSPlan, INITIAL_CONFIG } from './hooks/useKairOSPlan';
+import { useTabNavigation, TabKey } from './hooks/useTabNavigation';
 import { 
   SlidersHorizontal, 
   Clock, 
@@ -23,25 +32,6 @@ import {
   Music,
   Utensils
 } from 'lucide-react';
-
-const INITIAL_CONFIG: EventConfig = {
-  id: 'evt-kairos-01',
-  title: 'Ananya & Julian’s Vedic-Modern Union',
-  eventType: 'wedding',
-  date: '2026-11-14',
-  startTime: '14:00',
-  guestCount: 150,
-  totalBudget: 42000,
-  currency: 'USD',
-  venueType: 'hybrid_pavilion',
-  outdoorPortion: true,
-  municipalNoiseCurfewTime: '22:00',
-  culturalTraditions: ['hindu_vedic'],
-  dietaryFlags: ['Vegetarian', 'Gluten-Free', 'Halal'],
-  vibeKeywords: ['Vedic Sacred', 'Luminous', 'Organic Elegance', 'High-Joy'],
-};
-
-type TabKey = 'parameters' | 'timeline' | 'budget' | 'vendors' | 'simulation';
 
 interface TabDefinition {
   id: TabKey;
@@ -58,102 +48,29 @@ const TABS: TabDefinition[] = [
 ];
 
 export function App() {
-  const [config, setConfig] = useState<EventConfig>(INITIAL_CONFIG);
-  const [plan, setPlan] = useState<CompleteEventPlan | null>(null);
-  const [activeTab, setActiveTab] = useState<TabKey>('parameters');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMcpOpen, setIsMcpOpen] = useState(false);
-  const [isExportOpen, setIsExportOpen] = useState(false);
-  const [liveAnnouncement, setLiveAnnouncement] = useState('');
+  const {
+    config,
+    setConfig,
+    plan,
+    isLoading,
+    liveAnnouncement,
+    setLiveAnnouncement,
+    handleSynthesize,
+    handleUpdateCategoryAllocation,
+    handleToggleChecklist,
+  } = useKairOSPlan(INITIAL_CONFIG);
 
-  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({
-    parameters: null,
-    timeline: null,
-    budget: null,
-    vendors: null,
-    simulation: null,
+  const {
+    activeTab,
+    setActiveTab,
+    tabRefs,
+    handleTabKeyDown,
+  } = useTabNavigation('parameters', (newTab) => {
+    setLiveAnnouncement(`Switched to ${newTab} tab.`);
   });
 
-  // Initialize plan on initial render
-  useEffect(() => {
-    handleSynthesize(INITIAL_CONFIG);
-  }, []);
-
-  const handleSynthesize = async (cfgToUse: EventConfig = config) => {
-    setIsLoading(true);
-    setLiveAnnouncement(`Synthesizing event plan for ${cfgToUse.title}...`);
-    try {
-      const generated = await generateCompleteEventPlan(cfgToUse);
-      setPlan(generated);
-      setLiveAnnouncement(`Plan successfully synthesized for ${cfgToUse.title}. Overall status: ${generated.safetyReceipt.overallStatus}`);
-    } catch (err) {
-      console.error('Synthesis failed:', err);
-      setLiveAnnouncement('Error: Event plan synthesis encountered an issue.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Keyboard navigation for WAI-ARIA tablist (Arrow keys, Home, End)
-  const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: TabKey) => {
-    const tabKeys: TabKey[] = ['parameters', 'timeline', 'budget', 'vendors', 'simulation'];
-    const currentIndex = tabKeys.indexOf(currentTab);
-    let nextTab: TabKey | null = null;
-
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      nextTab = tabKeys[(currentIndex + 1) % tabKeys.length];
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      nextTab = tabKeys[(currentIndex - 1 + tabKeys.length) % tabKeys.length];
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      nextTab = tabKeys[0];
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      nextTab = tabKeys[tabKeys.length - 1];
-    }
-
-    if (nextTab) {
-      setActiveTab(nextTab);
-      tabRefs.current[nextTab]?.focus();
-      setLiveAnnouncement(`Switched to ${nextTab} tab.`);
-    }
-  };
-
-  // Dynamic Knapsack category update
-  const handleUpdateCategoryAllocation = (key: string, newAllocated: number, isLocked: boolean) => {
-    if (!plan) return;
-    const overrides = {
-      ...plan.budget.categories.reduce((acc, cat) => {
-        acc[cat.categoryKey] = { allocatedCost: cat.allocatedCost, isLocked: cat.isLocked };
-        return acc;
-      }, {} as Record<string, { allocatedCost?: number; isLocked?: boolean }>),
-      [key]: { allocatedCost: newAllocated, isLocked }
-    };
-
-    const updatedBudget = solveBudgetKnapsack(config.totalBudget, config.eventType, 0.10, overrides);
-    const updatedReceipt = auditEventSafetyInvariants(config, plan.milestones, updatedBudget);
-
-    setPlan({
-      ...plan,
-      budget: updatedBudget,
-      safetyReceipt: updatedReceipt,
-    });
-    setLiveAnnouncement(`Updated ${key} category allocation to ${config.currency} ${newAllocated}.`);
-  };
-
-  // Toggle checklist item
-  const handleToggleChecklist = (id: string) => {
-    if (!plan) return;
-    const updatedChecklist = plan.vendorChecklist.map(c => 
-      c.id === id ? { ...c, isCompleted: !c.isCompleted } : c
-    );
-    setPlan({
-      ...plan,
-      vendorChecklist: updatedChecklist,
-    });
-  };
+  const [isMcpOpen, setIsMcpOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
@@ -165,7 +82,7 @@ export function App() {
         Skip to main content
       </a>
 
-      {/* Screen Reader Live Region */}
+      {/* Screen Reader Live Region (WCAG 4.1.3 Status Messages) */}
       <div 
         className="sr-only" 
         role="status" 

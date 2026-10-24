@@ -24,7 +24,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ plan, isOpen, onClose 
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const downloadFile = (content: string, filename: string, type: string) => {
     const blob = new Blob([content], { type });
@@ -95,7 +95,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ plan, isOpen, onClose 
       icsLines.push(`DTEND:${dtEnd}`);
       icsLines.push(`SUMMARY:${m.title} (${m.category.toUpperCase()})`);
       icsLines.push(`DESCRIPTION:Slack: ${m.totalSlack}m | Critical: ${m.isCritical} | Zone: ${m.zone || 'General'}`);
-      if (m.zone) icsLines.push(`LOCATION:${m.zone}`);
+      if (m.zone) {icsLines.push(`LOCATION:${m.zone}`);}
       icsLines.push('END:VEVENT');
     });
 

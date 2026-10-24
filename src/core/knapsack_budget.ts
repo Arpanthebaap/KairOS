@@ -152,7 +152,7 @@ export function solveBudgetKnapsack(
       .sort((a, b) => b.allocatedCost - a.allocatedCost);
 
     for (const cat of unlockedCats) {
-      if (excess <= 0) break;
+      if (excess <= 0) {break;}
       const multiplier = 1 + cat.salesTaxRate + cat.gratuityRate;
       const maxCanReduce = Math.max(0, cat.allocatedCost - 50);
       const reduction = Math.min(maxCanReduce, Math.ceil(excess / multiplier));

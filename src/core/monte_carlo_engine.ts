@@ -111,7 +111,7 @@ export function runMonteCarloSimulation(
     // Evaluate curfew breach under perturbed schedule
     const perturbedEndMinutes = startMinutesFromMidnight + baseTotalDuration + criticalDelay;
     const curfewBreached = config.outdoorPortion && perturbedEndMinutes > curfewMinutesFromMidnight;
-    if (curfewBreached) curfewBreachesCount++;
+    if (curfewBreached) {curfewBreachesCount++;}
 
     // Evaluate HACCP thermal exposure breach
     let haccpBreached = false;
@@ -123,7 +123,7 @@ export function runMonteCarloSimulation(
         }
       }
     });
-    if (haccpBreached) haccpBreachesCount++;
+    if (haccpBreached) {haccpBreachesCount++;}
 
     // Retain first 20 scenarios for visual inspectability
     if (i < 20) {

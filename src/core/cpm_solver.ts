@@ -72,7 +72,7 @@ export function solveCriticalPathMethod(
   // Kahn's Algorithm for Topological Sort & Cycle Detection
   const queue: string[] = [];
   inDegree.forEach((deg, id) => {
-    if (deg === 0) queue.push(id);
+    if (deg === 0) {queue.push(id);}
   });
 
   const topoOrder: string[] = [];

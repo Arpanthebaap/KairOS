@@ -24,18 +24,18 @@ export const EventWizard: React.FC<EventWizardProps> = ({
 
   const handleTypeChange = (type: EventType) => {
     let defaultTitle = 'Grand Celebration';
-    if (type === 'wedding') defaultTitle = 'Ananya & Julian’s Cross-Cultural Wedding';
-    if (type === 'birthday') defaultTitle = 'Sofia’s 15th Quinceañera & Family Jubilee';
-    if (type === 'community_event') defaultTitle = 'Greenwich Harvest Civic & Cultural Festival';
+    if (type === 'wedding') {defaultTitle = 'Ananya & Julian’s Cross-Cultural Wedding';}
+    if (type === 'birthday') {defaultTitle = 'Sofia’s 15th Quinceañera & Family Jubilee';}
+    if (type === 'community_event') {defaultTitle = 'Greenwich Harvest Civic & Cultural Festival';}
 
     let defaultBudget = 35000;
-    if (type === 'birthday') defaultBudget = 12000;
-    if (type === 'community_event') defaultBudget = 45000;
+    if (type === 'birthday') {defaultBudget = 12000;}
+    if (type === 'community_event') {defaultBudget = 45000;}
 
     let defaultTraditions: string[] = [];
-    if (type === 'wedding') defaultTraditions = ['hindu_vedic'];
-    if (type === 'birthday') defaultTraditions = ['quinceanera_hispanic'];
-    if (type === 'community_event') defaultTraditions = ['community_festival'];
+    if (type === 'wedding') {defaultTraditions = ['hindu_vedic'];}
+    if (type === 'birthday') {defaultTraditions = ['quinceanera_hispanic'];}
+    if (type === 'community_event') {defaultTraditions = ['community_festival'];}
 
     onChange({
       ...config,

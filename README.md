@@ -361,6 +361,7 @@ KairOS is engineered in accordance with rigorous accessibility and zero-cloud pr
   - Universal high-contrast palette ratios ($\ge 4.5:1$) with explicit focus-visible rings (`:focus-visible`).
   - Screen reader status live regions (`aria-live="polite"`, `role="status"`) announcing state changes and synthesis updates.
   - Explicit `<label htmlFor="...">` and `id` pairings across all form controls, sliders, and interactive widgets.
+  - Windows High Contrast Mode enforcement via `@media (forced-colors: active)` with explicit button and focus boundary styling.
   - Vestibular disorder protection via `@media (prefers-reduced-motion: reduce)` suppressing non-essential animations.
 - **Zero-Cloud Edge Privacy:** In offline execution mode, 100% of event data, vendor costs, and guest metrics remain inside browser memory, preventing personal data harvesting.
 
@@ -411,7 +412,7 @@ npm install
 ```
 
 ### 2. Run Invariant Verification Suite (Vitest)
-Execute the complete test suite verifying CPM slack calculations, budget bounds, and safety governors:
+Execute the comprehensive test suite (93 tests across 16 suites) verifying CPM slack calculations, budget bounds, runtime type guards, and safety governors:
 ```bash
 npm run test
 ```
