@@ -39,20 +39,20 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 md:p-6 shadow-xl space-y-5">
+    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 md:p-6 shadow-xl space-y-5" role="region" aria-label="Spatiotemporal Schedule & Critical Path Method">
       {/* Header and CPM Metrics */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Compass className="w-5 h-5 text-emerald-400" />
-              Spatiotemporal Schedule & Critical Path Method (CPM)
+              <Compass className="w-5 h-5 text-emerald-400" aria-hidden={true} />
+              Spatiotemporal Schedule &amp; Critical Path Method (CPM)
             </h2>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 font-mono">
               {criticalMilestonesCount} Zero-Slack Milestones
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-300 mt-1">
             Topologically sorted dependency network with early/late passes, float analysis, and HACCP thermal auditing.
           </p>
         </div>
@@ -70,28 +70,28 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-        <span className="font-semibold text-slate-300">Legend:</span>
+      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80" aria-label="Schedule Legend">
+        <span className="font-semibold text-slate-200">Legend:</span>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-rose-600 ring-1 ring-rose-400"></div>
-          <span className="text-slate-300 font-mono">Critical Path (Slack = 0 min)</span>
+          <div className="w-3 h-3 rounded bg-rose-600 ring-1 ring-rose-400" aria-hidden={true} />
+          <span className="text-slate-200 font-mono">Critical Path (Slack = 0 min)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-emerald-600/80"></div>
-          <span className="text-slate-300 font-mono">Flexible Milestone (Slack &gt; 0 min)</span>
+          <div className="w-3 h-3 rounded bg-emerald-600/80" aria-hidden={true} />
+          <span className="text-slate-200 font-mono">Flexible Milestone (Slack &gt; 0 min)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Flame className="w-3.5 h-3.5 text-amber-400" />
+          <Flame className="w-3.5 h-3.5 text-amber-400" aria-hidden={true} />
           <span>HACCP Temp Controlled (&lt;120 min)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+          <Volume2 className="w-3.5 h-3.5 text-cyan-400" aria-hidden={true} />
           <span>Acoustic Decibel Monitoring</span>
         </div>
       </div>
 
       {/* Milestones List & Gantt Cards */}
-      <div className="space-y-3">
+      <div className="space-y-3" role="list" aria-label="Scheduled Milestones List">
         {milestones.map((m) => {
           const startPercent = totalEventDuration > 0 ? (m.earliestStart / totalEventDuration) * 100 : 0;
           const durationPercent = totalEventDuration > 0 ? (m.durationMinutes / totalEventDuration) * 100 : 0;
@@ -100,6 +100,7 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
           return (
             <div
               key={m.id}
+              role="listitem"
               className={`p-4 rounded-xl border transition-all ${
                 m.isCritical
                   ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-500/70 shadow-sm shadow-rose-950/30'
@@ -116,7 +117,7 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                       <h4 className="text-sm font-semibold text-white tracking-tight">{m.title}</h4>
                       {m.isCritical ? (
                         <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 font-mono font-medium flex items-center gap-0.5">
-                          <AlertTriangle className="w-2.5 h-2.5" /> CRITICAL
+                          <AlertTriangle className="w-2.5 h-2.5" aria-hidden={true} /> CRITICAL
                         </span>
                       ) : (
                         <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
@@ -124,14 +125,14 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                         </span>
                       )}
                     </div>
-                    {m.notes && <p className="text-xs text-slate-400 mt-0.5">{m.notes}</p>}
+                    {m.notes && <p className="text-xs text-slate-300 mt-0.5">{m.notes}</p>}
                   </div>
                 </div>
 
                 {/* Badges / Metrics */}
                 <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
                   {m.zone && (
-                    <span className="bg-slate-900 text-slate-300 px-2.5 py-1 rounded-md border border-slate-800">
+                    <span className="bg-slate-900 text-slate-200 px-2.5 py-1 rounded-md border border-slate-800">
                       📍 {m.zone}
                     </span>
                   )}
@@ -139,26 +140,30 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                     <span className={`px-2.5 py-1 rounded-md border flex items-center gap-1 ${
                       m.acousticDecibel >= 80 
                         ? 'bg-amber-950/40 border-amber-500/40 text-amber-300' 
-                        : 'bg-slate-900 border-slate-800 text-slate-300'
+                        : 'bg-slate-900 border-slate-800 text-slate-200'
                     }`}>
-                      <Volume2 className="w-3 h-3" /> {m.acousticDecibel} dBA
+                      <Volume2 className="w-3 h-3" aria-hidden={true} /> {m.acousticDecibel} dBA
                     </span>
                   )}
                   {m.isTemperatureSensitive && (
                     <span className="bg-amber-950/50 border border-amber-500/40 text-amber-300 px-2.5 py-1 rounded-md flex items-center gap-1">
-                      <Flame className="w-3 h-3 text-amber-400" /> HACCP Monitored
+                      <Flame className="w-3 h-3 text-amber-400" aria-hidden={true} /> HACCP Monitored
                     </span>
                   )}
                   <div className="bg-slate-900 text-slate-200 px-2.5 py-1 rounded-md border border-slate-800 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-emerald-400" />
+                    <Clock className="w-3 h-3 text-emerald-400" aria-hidden={true} />
                     <span>{formatClockTime(m.earliestStart)} – {formatClockTime(m.earliestFinish)}</span>
                     <span className="text-slate-400">({m.durationMinutes}m)</span>
                   </div>
                 </div>
               </div>
 
-              {/* Gantt Bar Projection */}
-              <div className="w-full bg-slate-950 h-5 rounded-md overflow-hidden relative border border-slate-800/80">
+              {/* Gantt Bar Projection with WAI-ARIA accessible description */}
+              <div 
+                className="w-full bg-slate-950 h-5 rounded-md overflow-hidden relative border border-slate-800/80"
+                role="img"
+                aria-label={`${m.title} timeline projection from ${formatClockTime(m.earliestStart)} to ${formatClockTime(m.earliestFinish)}. Duration: ${m.durationMinutes} minutes. Slack buffer: ${m.totalSlack} minutes.`}
+              >
                 {/* Active milestone duration bar */}
                 <div
                   className={`h-full absolute rounded-sm transition-all flex items-center justify-between px-2 text-[10px] font-mono text-white ${
@@ -191,10 +196,10 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
 
               {/* Dependency linkages */}
               {m.dependencies.length > 0 && (
-                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
-                  <LinkIcon className="w-3 h-3 text-slate-500 shrink-0" />
-                  <span>Prerequisites: </span>
-                  <span className="text-slate-300 font-mono">
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-300">
+                  <LinkIcon className="w-3 h-3 text-slate-400 shrink-0" aria-hidden={true} />
+                  <span className="text-slate-400">Prerequisites: </span>
+                  <span className="text-slate-200 font-mono">
                     {m.dependencies.map(depId => {
                       const match = milestones.find(item => item.id === depId);
                       return match ? match.title : depId;

@@ -23,14 +23,14 @@ export const BudgetOptimizer: React.FC<BudgetOptimizerProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <PieChart className="w-5 h-5 text-emerald-400" />
+              <PieChart className="w-5 h-5 text-emerald-400" aria-hidden={true} />
               Pareto-Optimal Budget Knapsack Optimizer
             </h2>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono">
               0.00% Drift Invariant
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-300 mt-1">
             Convex quadratic knapsack projection with fixed vendor deposit floors, non-linear sales tax, gratuity, and liquidity cushions.
           </p>
         </div>
@@ -42,7 +42,7 @@ export const BudgetOptimizer: React.FC<BudgetOptimizerProps> = ({
               ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' 
               : 'bg-rose-950/60 border-rose-500/40 text-rose-300'
           }`}>
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-emerald-400" aria-hidden={true} />
             <span>Cap: {currency} {budget.totalBudget.toLocaleString()}</span>
           </div>
         </div>
@@ -68,7 +68,7 @@ export const BudgetOptimizer: React.FC<BudgetOptimizerProps> = ({
 
         <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
           <span className="text-[11px] text-emerald-400 uppercase font-semibold flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3" /> Mandatory 10% Reserve
+            <ShieldCheck className="w-3 h-3" aria-hidden={true} /> Mandatory 10% Reserve
           </span>
           <div className="text-base font-bold text-emerald-300 mt-1 font-mono">
             {currency} {budget.contingencyReserve.toLocaleString()}
@@ -89,15 +89,22 @@ export const BudgetOptimizer: React.FC<BudgetOptimizerProps> = ({
         </div>
       </div>
 
-      {/* Aggregate Spend Progress Bar */}
+      {/* Aggregate Spend Progress Bar with WAI-ARIA role="progressbar" */}
       <div className="space-y-1.5">
         <div className="flex justify-between text-xs font-mono">
-          <span className="text-slate-400">Budget Envelope Saturation</span>
+          <span className="text-slate-300">Budget Envelope Saturation</span>
           <span className={budget.isBudgetValid ? 'text-emerald-400' : 'text-rose-400 font-bold'}>
             {currency} {budget.netTotalExpenditure.toLocaleString()} / {currency} {budget.totalBudget.toLocaleString()} ({spendPercentage}%)
           </span>
         </div>
-        <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 flex">
+        <div 
+          role="progressbar"
+          aria-valuenow={spendPercentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Budget envelope saturation progress"
+          className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 flex"
+        >
           <div 
             className="h-full bg-blue-500"
             style={{ width: `${(budget.allocatedSubtotal / budget.totalBudget) * 100}%` }}
@@ -126,6 +133,8 @@ export const BudgetOptimizer: React.FC<BudgetOptimizerProps> = ({
             const taxAmt = Math.round(cat.allocatedCost * cat.salesTaxRate);
             const tipAmt = Math.round(cat.allocatedCost * cat.gratuityRate);
             const totalWithOverhead = cat.allocatedCost + taxAmt + tipAmt;
+            const sliderId = `slider-${cat.categoryKey}`;
+            const maxRange = Math.max(cat.minSpendFloor * 3, Math.round(budget.totalBudget * 0.5));
 
             return (
               <div 
@@ -148,33 +157,41 @@ export const BudgetOptimizer: React.FC<BudgetOptimizerProps> = ({
                   <button
                     type="button"
                     onClick={() => onUpdateCategoryAllocation(cat.categoryKey, cat.allocatedCost, !cat.isLocked)}
-                    className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
+                    aria-label={cat.isLocked ? `Unlock ${cat.name} allocation for dynamic rebalancing` : `Lock ${cat.name} allocation`}
                     title={cat.isLocked ? "Unlock for dynamic rebalancing" : "Lock this allocation"}
                   >
-                    {cat.isLocked ? <Lock className="w-3.5 h-3.5 text-purple-400" /> : <Unlock className="w-3.5 h-3.5 text-slate-500" />}
+                    {cat.isLocked ? <Lock className="w-3.5 h-3.5 text-purple-400" aria-hidden={true} /> : <Unlock className="w-3.5 h-3.5 text-slate-500" aria-hidden={true} />}
                   </button>
                 </div>
 
-                <p className="text-xs text-slate-400 mb-3 line-clamp-1">{cat.description}</p>
+                <p className="text-xs text-slate-300 mb-3 line-clamp-1">{cat.description}</p>
 
-                {/* Allocated Cost and Slider */}
+                {/* Allocated Cost and Slider with complete WAI-ARIA slider attributes */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs font-mono">
-                    <span className="text-slate-400">Base Allocation:</span>
+                    <label htmlFor={sliderId} className="text-slate-300 cursor-pointer">Base Allocation:</label>
                     <span className="text-white font-bold text-sm">
                       {currency} {cat.allocatedCost.toLocaleString()}
                     </span>
                   </div>
 
                   <input
+                    id={sliderId}
                     type="range"
+                    role="slider"
+                    aria-label={`${cat.name} base budget allocation`}
+                    aria-valuemin={cat.minSpendFloor}
+                    aria-valuemax={maxRange}
+                    aria-valuenow={cat.allocatedCost}
+                    aria-valuetext={`${currency} ${cat.allocatedCost}`}
                     min={cat.minSpendFloor}
-                    max={Math.max(cat.minSpendFloor * 3, Math.round(budget.totalBudget * 0.5))}
+                    max={maxRange}
                     step="100"
                     value={cat.allocatedCost}
                     disabled={cat.isLocked}
                     onChange={(e) => onUpdateCategoryAllocation(cat.categoryKey, Number(e.target.value), cat.isLocked ?? false)}
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 disabled:opacity-40"
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
                   />
 
                   <div className="flex justify-between text-[10px] text-slate-400 font-mono">

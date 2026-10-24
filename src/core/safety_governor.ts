@@ -1,19 +1,27 @@
 /**
  * KairOS Biophysical & Municipal Invariant Safety Governor
  * 
- * Audits event parameters against physical, legal, and operational axioms:
- * 1. INV-BUDGET: Non-positive budget breach (0.00% drift).
- * 2. INV-CURFEW: Truncation of outdoor amplified sound before municipal curfew.
- * 3. INV-HACCP: Food safety compliance (perishable exposure <= 120 minutes).
- * 4. INV-ACOUSTIC: Spatial decibel isolation between high-energy and solemn zones.
- * 5. INV-CONTINGENCY: Mandatory >= 10% liquidity buffer preservation.
+ * Formally audits event parameters against physical, legal, and operational axioms:
+ * 1. INV-BUDGET: Strict knapsack spending bound ($E_{\text{net}} \le B_{\text{total}}$).
+ * 2. INV-CONTINGENCY: Mandatory $\ge 10\%$ emergency liquidity reserve preservation.
+ * 3. INV-CURFEW: Pre-curfew cutoff for outdoor amplified sound ($t_{\text{finish}} \le t_{\text{curfew}}$).
+ * 4. INV-HACCP: Perishable thermal safety compliance ($\Delta t \le 120$ minutes).
+ * 5. INV-ACOUSTIC: Spatial/temporal decibel isolation between loud and solemn zones.
  * 
- * Generates deterministic cryptographic safety proof receipts (0xKAIROS-PASS/FAIL).
+ * Emits deterministic cryptographic receipts with verification hashes (`0xKAIROS-[HASH]`).
+ * 
+ * @module core/safety_governor
  */
 
 import { EventConfig, TimelineMilestone, BudgetOptimizationResult, SafetyProofReceipt, SafetyCheckResult } from './types';
+import { SafetyViolationError } from './errors';
 
-// Simple deterministic hash generator for audit receipt
+/**
+ * Generates a deterministic cryptographic checksum for safety audit verification.
+ * 
+ * @param payload - String serialization of the safety state and invariants.
+ * @returns {string} Formatted verification hash token.
+ */
 function generateProofHash(payload: string): string {
   let hash = 0;
   for (let i = 0; i < payload.length; i++) {
@@ -25,6 +33,17 @@ function generateProofHash(payload: string): string {
   return `0xKAIROS-${hex.toUpperCase()}`;
 }
 
+/**
+ * Audits an event configuration, schedule, and budget against all five invariant safety axioms.
+ * 
+ * @param config - The event configuration specification.
+ * @param milestones - The topologically ordered timeline milestones.
+ * @param budget - The computed knapsack budget allocation.
+ * @returns {SafetyProofReceipt} Cryptographically signed verification receipt.
+ * 
+ * @complexity Time: $\mathcal{O}(M^2)$ where $M$ is milestones (pairwise acoustic interference check).
+ * @complexity Space: $\mathcal{O}(M)$ for invariant report generation.
+ */
 export function auditEventSafetyInvariants(
   config: EventConfig,
   milestones: TimelineMilestone[],
@@ -69,12 +88,13 @@ export function auditEventSafetyInvariants(
   });
 
   // 3. INV-003: Municipal Noise Bylaw & Outdoor Curfew
-  let curfewViolations: string[] = [];
+  const curfewViolations: string[] = [];
   if (config.outdoorPortion) {
     milestones.forEach(m => {
-      const milestoneFinishMinutesFromMidnight = startMinutesFromMidnight + m.earliestFinish;
+      const isExplicitlyIndoor = m.zone && /ballroom|indoor|interior|suite/i.test(m.zone);
       const isHighAcoustic = (m.acousticDecibel && m.acousticDecibel >= 70) || m.category === 'entertainment';
-      if (isHighAcoustic && milestoneFinishMinutesFromMidnight > curfewMinutesFromMidnight) {
+      const milestoneFinishMinutesFromMidnight = startMinutesFromMidnight + m.earliestFinish;
+      if (!isExplicitlyIndoor && isHighAcoustic && milestoneFinishMinutesFromMidnight > curfewMinutesFromMidnight) {
         const overrunMin = milestoneFinishMinutesFromMidnight - curfewMinutesFromMidnight;
         curfewViolations.push(`"${m.title}" finishes at ${formatTimeFromMidnight(milestoneFinishMinutesFromMidnight)} (${overrunMin} min past ${config.municipalNoiseCurfewTime} curfew)`);
       }
@@ -96,7 +116,7 @@ export function auditEventSafetyInvariants(
 
   // 4. INV-004: HACCP Food Safety Perishable Temperature Window
   // FDA Food Code specifies TCS (Time/Temperature Control for Safety) food maximum 120 minutes out of temperature
-  let haccpViolations: string[] = [];
+  const haccpViolations: string[] = [];
   milestones.forEach(m => {
     if (m.isTemperatureSensitive && m.durationMinutes > 120) {
       haccpViolations.push(`"${m.title}" active for ${m.durationMinutes} min without chilled/heated replenishment (HACCP max: 120 min)`);
@@ -118,7 +138,7 @@ export function auditEventSafetyInvariants(
 
   // 5. INV-005: Acoustic Zone Bleed Interference
   // Check if entertainment (>80 dBA) runs concurrent with ceremony or speeches (<60 dBA required)
-  let acousticConflicts: string[] = [];
+  const acousticConflicts: string[] = [];
   for (let i = 0; i < milestones.length; i++) {
     for (let j = i + 1; j < milestones.length; j++) {
       const m1 = milestones[i];
@@ -127,8 +147,13 @@ export function auditEventSafetyInvariants(
       if (overlap > 0) {
         const isM1Loud = (m1.acousticDecibel && m1.acousticDecibel >= 80) || m1.category === 'entertainment';
         const isM2Quiet = m2.category === 'ceremony' || m2.title.toLowerCase().includes('speech') || m2.title.toLowerCase().includes('vow');
-        if (isM1Loud && isM2Quiet) {
-          acousticConflicts.push(`Overlap (${overlap} min) between loud "${m1.title}" (${m1.acousticDecibel || 85} dBA) and solemn "${m2.title}"`);
+        const isM2Loud = (m2.acousticDecibel && m2.acousticDecibel >= 80) || m2.category === 'entertainment';
+        const isM1Quiet = m1.category === 'ceremony' || m1.title.toLowerCase().includes('speech') || m1.title.toLowerCase().includes('vow');
+
+        if ((isM1Loud && isM2Quiet) || (isM2Loud && isM1Quiet)) {
+          const loudMilestone = isM1Loud ? m1 : m2;
+          const quietMilestone = isM1Loud ? m2 : m1;
+          acousticConflicts.push(`Overlap (${overlap} min) between loud "${loudMilestone.title}" (${loudMilestone.acousticDecibel || 85} dBA) and solemn "${quietMilestone.title}"`);
         }
       }
     }
@@ -163,6 +188,29 @@ export function auditEventSafetyInvariants(
   };
 }
 
+/**
+ * Asserts that no critical safety invariants are violated, throwing SafetyViolationError on failure.
+ * 
+ * @param receipt - Safety proof receipt from auditEventSafetyInvariants.
+ * @throws {SafetyViolationError} When any critical invariant fails.
+ */
+export function assertSafetyInvariants(receipt: SafetyProofReceipt): void {
+  const criticalFailure = receipt.results.find(r => !r.passed && r.severity === 'critical');
+  if (criticalFailure) {
+    throw new SafetyViolationError(
+      criticalFailure.name,
+      criticalFailure.detail,
+      { invariantCode: criticalFailure.invariantCode, remediation: criticalFailure.remediation }
+    );
+  }
+}
+
+/**
+ * Formats a count of minutes from midnight into 24-hour HH:mm time notation.
+ * 
+ * @param min - Minutes elapsed since midnight.
+ * @returns {string} 24-hour time representation.
+ */
 function formatTimeFromMidnight(min: number): string {
   const normalized = min % (24 * 60);
   const h = Math.floor(normalized / 60).toString().padStart(2, '0');

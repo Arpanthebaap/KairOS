@@ -2,14 +2,22 @@
  * KairOS Bounded Knapsack & Convex Resource Allocation Solver
  * 
  * Formulates budget distribution across vendor categories as a constrained
- * optimization problem with fixed-deposit floors, non-linear sales tax,
- * mandatory service gratuity, and safety contingency reserves.
+ * convex knapsack optimization problem with non-linear vendor minimum spend floors,
+ * municipal sales taxes, service gratuities, and mandatory liquidity reserves.
  * 
- * Invariant Guarantee: Total expenditure strictly satisfies E <= B_total (0.00% drift).
+ * Invariant Guarantee:
+ * Net total expenditure satisfies $E_{\text{net}} \le B_{\text{total}}$ with $0.00\%$ over-budget drift.
+ * Mandatory liquidity cushion satisfies $R_{\text{cont}} \ge \alpha \cdot B_{\text{total}}$ where $\alpha \ge 0.10$.
+ * 
+ * @module core/knapsack_budget
  */
 
 import { BudgetCategory, BudgetOptimizationResult, EventType } from './types';
+import { BudgetDeficitError } from './errors';
 
+/**
+ * Baseline econometric budget category distributions for event archetypes.
+ */
 export const DEFAULT_BUDGET_WEIGHTS: Record<EventType, Record<string, { weight: number; minFloor: number; tax: number; tip: number; desc: string }>> = {
   wedding: {
     venue: { weight: 0.28, minFloor: 2500, tax: 0.08, tip: 0.00, desc: 'Venue rental, ceremony lawn, security & staging' },
@@ -39,13 +47,26 @@ export const DEFAULT_BUDGET_WEIGHTS: Record<EventType, Record<string, { weight: 
 };
 
 /**
- * Solves the optimal constrained budget knapsack allocation.
- * Guarantees zero-overrun: Total Net Expenditure <= totalBudget.
+ * Solves the constrained budget knapsack allocation across categories.
+ * 
+ * Mathematically allocates spendable capital $B_{\text{spendable}} = B_{\text{total}} - R_{\text{cont}} - \sum_{k \in \text{Locked}} c_k(1 + \tau_k + \gamma_k)$
+ * proportionally across unlocked categories according to normalized weights $w_i$, subject to:
+ * - $c_i \ge \text{floor}_i$
+ * - $\sum_{i} [c_i (1 + \tau_i + \gamma_i)] + R_{\text{cont}} \le B_{\text{total}}$
+ * 
+ * @param totalBudget - Gross budget envelope for the event.
+ * @param eventType - Archetype category defining structural econometric weights.
+ * @param contingencyRate - Percentage reserved for emergency liquidity (default: 0.10).
+ * @param overrides - Optional manual overrides fixing allocations or lock states.
+ * @returns {BudgetOptimizationResult} Pareto-optimal allocation guaranteeing zero over-budget drift.
+ * 
+ * @complexity Time: $\mathcal{O}(K \log K)$ where $K$ is the number of vendor categories (sorting for invariant gate).
+ * @complexity Space: $\mathcal{O}(K)$ for category structures.
  */
 export function solveBudgetKnapsack(
   totalBudget: number,
   eventType: EventType,
-  contingencyRate: number = 0.10, // 10% mandatory reserve
+  contingencyRate: number = 0.10,
   overrides?: Record<string, { allocatedCost?: number; isLocked?: boolean }>
 ): BudgetOptimizationResult {
   const safeTotalBudget = Math.max(1000, totalBudget);
@@ -73,7 +94,7 @@ export function solveBudgetKnapsack(
       gratuityRate: cfg.tip,
       isLocked,
       description: cfg.desc,
-      vendorPointers: [`Certified ${key.replace(/_/g, ' ')} vendors`, `Insurance verification required`],
+      vendorPointers: [`Certified ${key.replace(/_/g, ' ')} vendors`, 'Insurance verification required'],
     };
   });
 
@@ -167,4 +188,16 @@ export function solveBudgetKnapsack(
     isBudgetValid,
     categories,
   };
+}
+
+/**
+ * Asserts that a budget allocation strictly obeys the non-deficit invariant.
+ * 
+ * @param result - The budget optimization result to validate.
+ * @throws {BudgetDeficitError} When net expenditure strictly exceeds total budget.
+ */
+export function assertBudgetInvariant(result: BudgetOptimizationResult): void {
+  if (result.netTotalExpenditure > result.totalBudget) {
+    throw new BudgetDeficitError(result.totalBudget, result.netTotalExpenditure);
+  }
 }

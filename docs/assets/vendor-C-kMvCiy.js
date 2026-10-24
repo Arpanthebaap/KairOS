@@ -1,4 +1,4 @@
-import{r as yc}from"./lucide-CXBUeDOg.js";var hi={exports:{}},ve={},yi={exports:{}},gi={};/**
+import{r as yc}from"./lucide-1ziLolO1.js";var hi={exports:{}},ve={},yi={exports:{}},gi={};/**
  * @license React
  * scheduler.production.min.js
  *

@@ -1,6 +1,6 @@
 import React from 'react';
 import { EventConfig, EventType } from '../core/types';
-import { Calendar, Users, DollarSign, Clock, MapPin, Volume2, Sparkles, Check } from 'lucide-react';
+import { Calendar, Users, DollarSign, Clock, MapPin, Sparkles } from 'lucide-react';
 import { CULTURAL_PROTOCOLS } from '../core/cultural_ontology';
 
 interface EventWizardProps {
@@ -69,9 +69,9 @@ export const EventWizard: React.FC<EventWizardProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>🎯</span> Event Parameter Specification Studio
+            <span role="img" aria-label="Target Dart">🎯</span> Event Parameter Specification Studio
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-300">
             Define boundaries, budgets, and cultural traditions for neuro-symbolic synthesis.
           </p>
         </div>
@@ -79,30 +79,38 @@ export const EventWizard: React.FC<EventWizardProps> = ({
           type="button"
           onClick={onSynthesize}
           disabled={isLoading}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/40 disabled:opacity-50 transition-all cursor-pointer"
+          aria-label="Re-synthesize complete event plan"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/40 disabled:opacity-50 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
         >
-          <Sparkles className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <Sparkles className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} aria-hidden={true} />
           <span>{isLoading ? 'Synthesizing...' : 'Re-Synthesize Plan'}</span>
         </button>
       </div>
 
-      {/* 1. Event Type Selector */}
+      {/* 1. Event Type Selector with WAI-ARIA Radio Group */}
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+        <label id="archetype-label" className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
           1. Select Event Archetype
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div 
+          role="radiogroup" 
+          aria-labelledby="archetype-label" 
+          className="grid grid-cols-1 md:grid-cols-3 gap-3"
+        >
           {eventTypes.map(item => {
             const isSelected = config.eventType === item.type;
             return (
               <button
                 key={item.type}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={isSelected ? 0 : -1}
                 onClick={() => handleTypeChange(item.type)}
-                className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
+                className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
                   isSelected
                     ? 'bg-emerald-950/40 border-emerald-500/80 ring-1 ring-emerald-500/50 shadow-md shadow-emerald-950/20'
-                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-400'
+                    : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
                 }`}
               >
                 <div className="flex items-center gap-2 text-base font-semibold text-white mb-1">
@@ -116,163 +124,188 @@ export const EventWizard: React.FC<EventWizardProps> = ({
         </div>
       </div>
 
-      {/* 2. Core Constraints Grid */}
+      {/* 2. Core Constraints Grid with Explicit Label htmlFor Pairing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Title */}
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-slate-300 mb-1">
+          <label htmlFor="event-title-input" className="block text-xs font-medium text-slate-200 mb-1">
             Celebration Title / Honorific
           </label>
           <input
+            id="event-title-input"
             type="text"
             value={config.title}
             onChange={e => onChange({ ...config, title: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-400"
           />
         </div>
 
         {/* Date */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Date
+          <label htmlFor="event-date-input" className="block text-xs font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-emerald-400" aria-hidden={true} /> Date
           </label>
           <input
+            id="event-date-input"
             type="date"
             value={config.date}
             onChange={e => onChange({ ...config, date: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-400"
           />
         </div>
 
         {/* Start Time */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-emerald-400" /> Start Time (HH:mm)
+          <label htmlFor="event-start-time-input" className="block text-xs font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-emerald-400" aria-hidden={true} /> Start Time (HH:mm)
           </label>
           <input
+            id="event-start-time-input"
             type="time"
             value={config.startTime}
             onChange={e => onChange({ ...config, startTime: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-400"
           />
         </div>
 
         {/* Total Budget */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Total Budget ({config.currency})
+          <label htmlFor="event-budget-input" className="block text-xs font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+            <DollarSign className="w-3.5 h-3.5 text-emerald-400" aria-hidden={true} /> Total Budget ({config.currency})
           </label>
           <input
+            id="event-budget-input"
             type="number"
             min="1000"
             step="500"
             value={config.totalBudget}
             onChange={e => onChange({ ...config, totalBudget: Math.max(1000, Number(e.target.value)) })}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-mono focus-visible:ring-2 focus-visible:ring-emerald-400"
           />
         </div>
 
         {/* Guest Count */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-emerald-400" /> Estimated Guests
+          <label htmlFor="event-guest-count-input" className="block text-xs font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5 text-emerald-400" aria-hidden={true} /> Estimated Guests
           </label>
           <input
+            id="event-guest-count-input"
             type="number"
             min="10"
             max="2500"
             value={config.guestCount}
             onChange={e => onChange({ ...config, guestCount: Math.max(10, Number(e.target.value)) })}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-mono focus-visible:ring-2 focus-visible:ring-emerald-400"
           />
         </div>
 
         {/* Outdoor Toggle */}
         <div className="flex flex-col justify-end">
-          <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700">
+          <label htmlFor="event-outdoor-toggle" className="flex items-center gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 focus-within:ring-2 focus-within:ring-emerald-400">
             <input
+              id="event-outdoor-toggle"
               type="checkbox"
               checked={config.outdoorPortion}
               onChange={e => onChange({ ...config, outdoorPortion: e.target.checked })}
-              className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+              className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
             />
-            <span className="text-xs text-slate-300 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-amber-400" /> Outdoor Zone Active
+            <span className="text-xs text-slate-200 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-amber-400" aria-hidden={true} /> Outdoor Zone Active
             </span>
           </label>
         </div>
 
-        {/* Municipal Curfew */}
+        {/* Noise Curfew */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-            <Volume2 className="w-3.5 h-3.5 text-rose-400" /> Noise Curfew Time
+          <label htmlFor="event-noise-curfew-input" className="block text-xs font-medium text-slate-200 mb-1 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-amber-400" aria-hidden={true} /> Municipal Noise Curfew
           </label>
           <input
+            id="event-noise-curfew-input"
             type="time"
             value={config.municipalNoiseCurfewTime}
             onChange={e => onChange({ ...config, municipalNoiseCurfewTime: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-400"
           />
         </div>
       </div>
 
-      {/* 3. Cultural Tradition Protocols */}
-      <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-          2. Cultural & Liturgical Protocols
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {Object.values(CULTURAL_PROTOCOLS).map(protocol => {
-            const isChecked = config.culturalTraditions.includes(protocol.id);
-            return (
-              <button
-                key={protocol.id}
-                type="button"
-                onClick={() => toggleTradition(protocol.id)}
-                className={`flex items-start gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  isChecked
-                    ? 'bg-purple-950/40 border-purple-500/80 text-purple-200'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                }`}
-              >
-                <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                  isChecked ? 'bg-purple-600 border-purple-500 text-white' : 'border-slate-600'
-                }`}>
-                  {isChecked && <Check className="w-3 h-3" />}
+      {/* 3. Cultural Traditions & Dietary Strictures */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-slate-800">
+        {/* Cultural Protocols */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+            Cultural &amp; Liturgical Traditions
+          </label>
+          <p className="text-xs text-slate-400">
+            Select traditions to enforce ceremonial dependencies, ritual order, and cultural taboos.
+          </p>
+          <div className="grid grid-cols-1 gap-2 pt-1">
+            {Object.values(CULTURAL_PROTOCOLS).map(trad => {
+              const active = config.culturalTraditions.includes(trad.id);
+              const checkboxId = `tradition-checkbox-${trad.id}`;
+              return (
+                <div
+                  key={trad.id}
+                  onClick={() => toggleTradition(trad.id)}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    active
+                      ? 'bg-purple-950/40 border-purple-500/80 text-white'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <label htmlFor={checkboxId} className="font-semibold text-xs text-white cursor-pointer flex items-center gap-2">
+                      <input
+                        id={checkboxId}
+                        type="checkbox"
+                        checked={active}
+                        onChange={() => {}} // handled by parent onClick
+                        className="rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5"
+                      />
+                      <span>{trad.name}</span>
+                    </label>
+                    <span className="text-[10px] text-purple-300 font-mono">{trad.origin}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1 pl-5">{trad.description}</p>
                 </div>
-                <div>
-                  <div className="text-xs font-semibold text-white leading-tight">{protocol.name}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{protocol.origin}</div>
-                </div>
-              </button>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* 4. Dietary & Allergen Flags */}
-      <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-          3. Mandatory Dietary & Allergen Invariants
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {commonDietary.map(flag => {
-            const isSelected = config.dietaryFlags.includes(flag);
-            return (
-              <button
-                key={flag}
-                type="button"
-                onClick={() => toggleDietary(flag)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-amber-950/50 border-amber-500/80 text-amber-300'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                }`}
-              >
-                {flag}
-              </button>
-            );
-          })}
+        {/* Dietary Strictures */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+            Dietary Requirements &amp; Allergen Isolation
+          </label>
+          <p className="text-xs text-slate-400">
+            HACCP kitchen segregation, cross-contamination rules, and certified menus.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {commonDietary.map(flag => {
+              const active = config.dietaryFlags.includes(flag);
+              const dietaryBtnId = `dietary-btn-${flag.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+              return (
+                <button
+                  key={flag}
+                  id={dietaryBtnId}
+                  type="button"
+                  role="checkbox"
+                  aria-checked={active}
+                  onClick={() => toggleDietary(flag)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
+                    active
+                      ? 'bg-emerald-950/60 border-emerald-500 text-emerald-300'
+                      : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                  }`}
+                >
+                  {active ? `✓ ${flag}` : `+ ${flag}`}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

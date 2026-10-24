@@ -3,22 +3,52 @@
  * 
  * Formally computes Earliest Start (ES), Earliest Finish (EF),
  * Latest Start (LS), Latest Finish (LF), and Total Slack (LS - ES)
- * for event milestones with precedence constraints.
+ * for event milestones with directed precedence constraints.
  * 
- * Detects cycles via topological sorting and isolates the Critical Path.
+ * Employs Kahn's topological sort algorithm for deterministic cycle detection
+ * and isolates the critical path ($\text{Slack} = 0$).
+ * 
+ * @module core/cpm_solver
  */
 
 import { TimelineMilestone } from './types';
+import { CycleDetectedError } from './errors';
 
+/**
+ * Result structure returned by the Critical Path Method solver.
+ */
 export interface CPMSolverResult {
+  /** Array of milestones annotated with computed spatiotemporal schedule metrics. */
   milestones: TimelineMilestone[];
+  /** Total makespan of the scheduled event in minutes. */
   totalEventDurationMinutes: number;
+  /** Identifiers of milestones residing strictly on the zero-slack critical path. */
   criticalPathMilestoneIds: string[];
+  /** Flag indicating whether the milestone dependency graph contains a directed cycle. */
   hasCycle: boolean;
+  /** Milestone IDs involved in a detected cycle, if applicable. */
   cycleNodes?: string[];
 }
 
-export function solveCriticalPathMethod(rawMilestones: Omit<TimelineMilestone, 'earliestStart' | 'earliestFinish' | 'latestStart' | 'latestFinish' | 'totalSlack' | 'isCritical'>[]): CPMSolverResult {
+/**
+ * Solves the spatiotemporal schedule for an event using the Critical Path Method (CPM).
+ * 
+ * Computes:
+ * 1. Forward Pass: $ES_j = \max_{i \in \text{Pred}(j)} EF_i$, $EF_j = ES_j + D_j$
+ * 2. Backward Pass: $LF_i = \min_{j \in \text{Succ}(i)} LS_j$, $LS_i = LF_i - D_i$
+ * 3. Total Float: $S_i = LS_i - ES_i = LF_i - EF_i$
+ * 4. Critical Path: $\{i \in V \mid S_i = 0\}$
+ * 
+ * @param rawMilestones - Input milestones with precedence dependencies and duration.
+ * @returns {CPMSolverResult} Comprehensive schedule solution with critical path identification.
+ * @throws {CycleDetectedError} When strict validation is requested and a cycle is detected.
+ * 
+ * @complexity Time: $\mathcal{O}(|V| + |E|)$ where $V$ is milestones and $E$ is dependencies.
+ * @complexity Space: $\mathcal{O}(|V| + |E|)$ for adjacency structures and degree tables.
+ */
+export function solveCriticalPathMethod(
+  rawMilestones: Omit<TimelineMilestone, 'earliestStart' | 'earliestFinish' | 'latestStart' | 'latestFinish' | 'totalSlack' | 'isCritical'>[]
+): CPMSolverResult {
   const nodeMap = new Map<string, typeof rawMilestones[0]>();
   const adj = new Map<string, string[]>(); // node -> list of successors
   const inDegree = new Map<string, number>();
@@ -163,4 +193,21 @@ export function solveCriticalPathMethod(rawMilestones: Omit<TimelineMilestone, '
     criticalPathMilestoneIds: criticalPathIds,
     hasCycle: false,
   };
+}
+
+/**
+ * Asserts that a milestone precedence graph is acyclic, throwing a CycleDetectedError if not.
+ * 
+ * @param milestones - Input milestones with dependencies.
+ * @returns {CPMSolverResult} The solved schedule if acyclic.
+ * @throws {CycleDetectedError} When a cycle is detected.
+ */
+export function assertAcyclicSchedule(
+  milestones: Omit<TimelineMilestone, 'earliestStart' | 'earliestFinish' | 'latestStart' | 'latestFinish' | 'totalSlack' | 'isCritical'>[]
+): CPMSolverResult {
+  const result = solveCriticalPathMethod(milestones);
+  if (result.hasCycle) {
+    throw new CycleDetectedError(result.cycleNodes || []);
+  }
+  return result;
 }
