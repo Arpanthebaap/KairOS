@@ -20,6 +20,14 @@ Version 1.0.0 • MIT licence
 
 ---
 
+<p align="center">
+  <img src="docs/assets/figure1_studio_overview.png" alt="KairOS Event Orchestration Studio Overview" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+  <br>
+  <em><b>Figure 1.</b> Live KairOS Neuro-Symbolic Event Studio running client-side. The platform concurrently visualizes multi-agent cultural and thematic synthesis (Vedic sacred fire, sitar-electronic acoustic soundscape, farm-to-table culinary pairing) alongside the Event Parameter Specification Studio.</em>
+</p>
+
+---
+
 ## Abstract
 
 Modern celebration and event orchestration—spanning complex multi-faith weddings, multi-generational milestone birthdays, and municipal community festivals—requires concurrent optimization across five orthogonal and mutually antagonistic dimensions: **(1)** non-linear financial knapsacks with fixed vendor deposit floors, non-linear sales tax, and tips; **(2)** spatiotemporal critical paths subject to setup durations and hard municipal noise curfews; **(3)** thermodynamic and biophysical safety windows, specifically the 120-minute perishable food holding rule codified under Hazard Analysis Critical Control Point (HACCP) regulations; **(4)** spatial acoustic decoupling to prevent sound bleed between high-energy entertainment and solemn speech zones; and **(5)** authentic cultural and liturgical sequence dependencies. 
@@ -184,6 +192,12 @@ Let an event be represented as a Directed Acyclic Graph $G = (V, E)$, where each
    $$\text{Slack}_i = 0$$
    Any operational perturbation $\Delta t > 0$ applied to a critical milestone directly propagates to delay total event completion: $\Delta T_{total} = \Delta t$.
 
+<p align="center">
+  <img src="docs/assets/figure3_cpm_gantt_schedule.png" alt="Spatiotemporal Schedule and Critical Path Method Gantt Visualization" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+  <br>
+  <em><b>Figure 2.</b> Critical Path Method (CPM) DAG schedule visualization in KairOS. Zero-slack critical milestones are flagged in red (e.g. Bridal Hair/Makeup Prep, Couple First Look, Solemn Ceremony & Vows), while flexible non-critical tasks display positive float buffers in green. Each milestone integrates spatial zoning, acoustic decibel monitoring, and HACCP food holding temperature windows.</em>
+</p>
+
 ### 4.2 Bounded Knapsack & Convex Budget Allocation (D-CSP)
 
 Given total capital budget $B_{total} \in \mathbb{R}^+$, we partition expenditure across $K$ vendor categories subject to mandatory emergency contingency reserve $B_{contingency} \ge \rho \cdot B_{total}$ (where $\rho = 0.10$):
@@ -202,6 +216,12 @@ If unconstrained initial allocation yields net expenditure $E = \sum c_k \mu_k +
 $$c_k \leftarrow c_k - \min\left(c_k - m_k, \left\lceil \frac{\Delta E}{\mu_k} \right\rceil\right)$$
 guaranteeing:
 $$\Delta_{drift} = \max(0, E_{net} - B_{total}) \equiv 0.00$$
+
+<p align="center">
+  <img src="docs/assets/figure4_budget_knapsack_optimizer.png" alt="Pareto-Optimal Budget Knapsack Optimizer" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+  <br>
+  <em><b>Figure 3.</b> Pareto-Optimal Budget Knapsack Optimizer enforcing the 0.00% over-budget drift invariant. Displays pre-tax vendor base subtotal ($27,616), automated sales tax & tip computation ($3,884), protected 10% emergency liquidity cushion ($3,500), and interactive category sliders with lock toggles.</em>
+</p>
 
 ### 4.3 Biophysical, Legal & Food Safety Invariants
 
@@ -240,11 +260,23 @@ alongside the 95th percentile critical path delay $P_{95}$, which is dynamically
 6. **Invariant Safety Verification**: The safety governor audits all physical bounds and issues a cryptographic proof receipt (`0xKAIROS-PASS-XXXXXXXX`).
 7. **Generative Multi-Agent Synthesis**: Cultural themes, sensory color palettes, acoustic soundscapes, and legally protective vendor RFPs/SLAs are generated.
 
+<p align="center">
+  <img src="docs/assets/figure2_event_parameter_studio.png" alt="KairOS Event Parameter Specification Studio" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+  <br>
+  <em><b>Figure 4.</b> Event Parameter Specification Studio. Planners designate event archetypes (Weddings, Milestone Birthdays, Community Festivals), financial boundaries, municipal noise curfew cutoffs (22:00), cultural liturgical protocols (Hindu Vedic, Jewish Traditional, Quinceañera), and mandatory dietary/allergen invariants.</em>
+</p>
+
 ### 5.2 Multi-Archetype Operational Workflows
 
 - **Weddings (Cross-Cultural & Traditional):** Reconciles complex ritual dependencies (e.g. Hindu Agni rituals, Jewish Chuppah blessings, Catholic liturgies), synchronizes sunset golden hour portraiture ($\pm 15\text{ min}$ solar ephemeris), and coordinates parallel bridal party hair/makeup prep.
 - **Milestone Birthdays (Quinceañera & Jubilees):** Integrates emotional family rites (e.g., Changing of the Shoes, Presentation of the Last Doll, Father-Daughter Waltz), choreographs surprise tributes, and enforces age-appropriate beverage segregation.
 - **Civic Community Festivals:** Coordinates municipal staging permits, power generators, sound stage acoustic decoupling ($< 68\text{ dBA}$ ambient limits), emergency first-aid tents, and ADA-compliant barrier-free crowd routes.
+
+<p align="center">
+  <img src="docs/assets/figure5_vendor_sla_command_center.png" alt="Vendor SLA, RFP and Operations Command Center" width="100%" style="border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+  <br>
+  <em><b>Figure 5.</b> Vendor SLA, RFP & Operations Command Center. Features a timeline-driven operational checklist (12 months, 6 months, 1 month, Day-Of), contractual SLA performance criteria, force majeure indemnities, and risk mitigation protocols.</em>
+</p>
 
 ---
 
